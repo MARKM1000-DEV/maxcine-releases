@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maxcine</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
+
+  :root {
+    --bg: #0b0a12;
+    --bg-glow: #1a1330;
+    --surface: #161320;
+    --surface-2: #1e1a2c;
+    --border: #2c2740;
+    --text: #f3f1f8;
+    --text-muted: #a39dbb;
+    --text-faint: #6f6987;
+    --accent: #6e5ce0;
+    --accent-hover: #8172ea;
+    --accent-ink: #ffffff;
+    --mono: 'IBM Plex Mono', ui-monospace, monospace;
+    --display: 'Bricolage Grotesque', system-ui, sans-serif;
+    --body-font: 'Manrope', system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    background: var(--bg);
+  }
+
+  body {
+    min-height: 100vh;
+    background:
+      radial-gradient(80% 60% at 50% -10%, var(--bg-glow) 0%, transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: var(--body-font);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+  }
+
+  .page {
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .eyebrow .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px rgba(110, 92, 224, 0.25);
+    flex: none;
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(40px, 8vw, 56px);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .lede {
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--text-muted);
+    max-width: 52ch;
+    margin: 0;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .download-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 24px;
+    justify-content: space-between;
+  }
+
+  .btn-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-family: var(--body-font);
+    font-weight: 700;
+    font-size: 18px;
+    text-decoration: none;
+    padding: 18px 30px;
+    border-radius: 14px;
+    box-shadow: 0 12px 32px -12px rgba(110, 92, 224, 0.7);
+    transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .btn-download:hover,
+  .btn-download:focus-visible {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 16px 36px -12px rgba(110, 92, 224, 0.8);
+  }
+
+  .btn-download:focus-visible {
+    outline: 3px solid var(--accent-ink);
+    outline-offset: 3px;
+  }
+
+  .btn-download svg { flex: none; }
+
+  .meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text-faint);
+  }
+
+  .meta strong {
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .steps h2 {
+    font-family: var(--body-font);
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-faint);
+    margin: 0;
+  }
+
+  .step {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .step-num {
+    flex: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: var(--mono);
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+  }
+
+  .step p {
+    margin: 0;
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--text-muted);
+  }
+
+  .step p strong { color: var(--text); font-weight: 600; }
+
+  .footnote {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-faint);
+    margin: 0;
+  }
+
+  @media (max-width: 480px) {
+    .download-row { flex-direction: column; align-items: stretch; }
+    .btn-download { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="eyebrow"><span class="dot"></span>Distribuição direta — fora da Play Store</div>
+
+  <h1>Maxcine</h1>
+  <p class="lede">
+    App de streaming pra Android TV e Google TV. Baixe o APK abaixo e instale
+    direto no seu aparelho.
+  </p>
+
+  <div class="card">
+    <div class="download-row">
+      <a class="btn-download" href="https://github.com/MARKM1000-DEV/maxcine-releases/releases/download/v2/app-release.apk">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 3V15M12 15L7 10M12 15L17 10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M4 17V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V17" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Baixar o APK
+      </a>
+      <div class="meta">
+        <span><strong>Versão</strong> v2 (1.0.0)</span>
+        <span><strong>Tamanho</strong> ~75 MB</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="steps">
+      <h2>Como instalar na TV</h2>
+      <div class="step">
+        <span class="step-num">1</span>
+        <p>Nas <strong>Configurações</strong> da TV, em Segurança, habilite a instalação de apps de fontes desconhecidas pro navegador que você está usando agora.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">2</span>
+        <p>Toque em <strong>Baixar o APK</strong> acima. Se aparecer um aviso do Play Protect, escolha <strong>instalar assim mesmo</strong>.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">3</span>
+        <p>Abra o arquivo baixado pra concluir a instalação. Da próxima vez, o próprio app avisa quando sair uma versão nova.</p>
+      </div>
+    </div>
+  </div>
+
+  <p class="footnote">Página de distribuição pessoal — não afiliada à Play Store nem a nenhuma loja de apps.</p>
+</div>
+</body>
+</html>
