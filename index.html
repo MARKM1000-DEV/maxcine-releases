@@ -219,36 +219,50 @@
 
   <h1>Maxcine</h1>
   <p class="lede">
-    App de streaming pra Android TV e Google TV. Baixe o APK abaixo e instale
-    direto no seu aparelho.
+    App de streaming pra Android TV, Google TV e celular. Baixe o APK do
+    seu aparelho abaixo e instale direto, sem Play Store.
   </p>
 
   <div class="card">
     <div class="download-row">
-      <a class="btn-download" href="https://github.com/MARKM1000-DEV/maxcine-releases/releases/latest/download/app-release.apk">
+      <a class="btn-download" id="tv-download" href="https://github.com/MARKM1000-DEV/maxcine-releases/releases/latest">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M12 3V15M12 15L7 10M12 15L17 10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M4 17V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V17" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        Baixar o APK
+        Baixar o APK — TV
       </a>
-      <div class="meta">
-        <span><strong>Versão</strong> v3 (1.1.0)</span>
-        <span><strong>Tamanho</strong> ~75 MB</span>
+      <div class="meta" id="tv-meta">
+        <span>Carregando versão...</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="download-row">
+      <a class="btn-download" id="mobile-download" href="https://github.com/MARKM1000-DEV/maxcine-releases/releases/latest">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 3V15M12 15L7 10M12 15L17 10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M4 17V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V17" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Baixar o APK — Celular
+      </a>
+      <div class="meta" id="mobile-meta">
+        <span>Carregando versão...</span>
       </div>
     </div>
   </div>
 
   <div class="card">
     <div class="steps">
-      <h2>Como instalar na TV</h2>
+      <h2>Como instalar</h2>
       <div class="step">
         <span class="step-num">1</span>
-        <p>Nas <strong>Configurações</strong> da TV, em Segurança, habilite a instalação de apps de fontes desconhecidas pro navegador que você está usando agora.</p>
+        <p>Nas <strong>Configurações</strong> do aparelho, em Segurança, habilite a instalação de apps de fontes desconhecidas pro navegador que você está usando agora.</p>
       </div>
       <div class="step">
         <span class="step-num">2</span>
-        <p>Toque em <strong>Baixar o APK</strong> acima. Se aparecer um aviso do Play Protect, escolha <strong>instalar assim mesmo</strong>.</p>
+        <p>Toque em <strong>Baixar o APK</strong> do seu aparelho acima. Se aparecer um aviso do Play Protect, escolha <strong>instalar assim mesmo</strong>.</p>
       </div>
       <div class="step">
         <span class="step-num">3</span>
@@ -259,5 +273,34 @@
 
   <p class="footnote">Página de distribuição pessoal — não afiliada à Play Store nem a nenhuma loja de apps.</p>
 </div>
+<script>
+  // TV e Mobile publicam releases separadas neste mesmo repositório
+  // público (tags "v<N>" e "mobile-v<N>") — por isso o link não pode
+  // ser o fixo ".../releases/latest/download/<asset>" (ele resolve pra
+  // release mais recente do repositório INTEIRO, então se o outro app
+  // publicar depois, o link do primeiro passa a apontar pro asset
+  // errado e quebra). Busca direto na API pública (sem token, repo é
+  // público) e filtra pelo prefixo de tag de cada app, mesma lógica do
+  // AppUpdater.kt do app (ver docs/VERSIONAMENTO.md).
+  async function loadRelease(tagPrefix, linkId, metaId) {
+    try {
+      const res = await fetch('https://api.github.com/repos/MARKM1000-DEV/maxcine-releases/releases');
+      const releases = await res.json();
+      const release = releases.find(r => r.tag_name.startsWith(tagPrefix) && /^\d+$/.test(r.tag_name.slice(tagPrefix.length)));
+      if (!release) return;
+      const asset = release.assets.find(a => a.name.endsWith('.apk'));
+      if (!asset) return;
+      document.getElementById(linkId).href = asset.browser_download_url;
+      const sizeMb = Math.round(asset.size / (1024 * 1024));
+      document.getElementById(metaId).innerHTML =
+        '<span><strong>Versão</strong> v' + release.tag_name.slice(tagPrefix.length) + '</span>' +
+        '<span><strong>Tamanho</strong> ~' + sizeMb + ' MB</span>';
+    } catch (e) {
+      document.getElementById(metaId).innerHTML = '<span>Não foi possível carregar — o link ainda abre a página de releases.</span>';
+    }
+  }
+  loadRelease('v', 'tv-download', 'tv-meta');
+  loadRelease('mobile-v', 'mobile-download', 'mobile-meta');
+</script>
 </body>
 </html>
