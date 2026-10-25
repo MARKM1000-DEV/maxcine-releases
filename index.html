@@ -219,8 +219,8 @@
 
   <h1>Maxcine</h1>
   <p class="lede">
-    App de streaming pra Android TV, Google TV e celular. Baixe o APK do
-    seu aparelho abaixo e instale direto, sem Play Store.
+    App de streaming pra Android TV, Google TV, celular e Windows. Baixe o
+    instalador do seu aparelho abaixo e instale direto, sem loja de apps.
   </p>
 
   <div class="card">
@@ -254,6 +254,21 @@
   </div>
 
   <div class="card">
+    <div class="download-row">
+      <a class="btn-download" id="desktop-download" href="https://github.com/MARKM1000-DEV/maxcine-releases/releases">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 3V15M12 15L7 10M12 15L17 10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M4 17V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V17" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Baixar o instalador — Windows
+      </a>
+      <div class="meta" id="desktop-meta">
+        <span>Carregando versão...</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
     <div class="steps">
       <h2>Como instalar</h2>
       <div class="step">
@@ -268,28 +283,62 @@
         <span class="step-num">3</span>
         <p>Abra o arquivo baixado pra concluir a instalação. Da próxima vez, o próprio app avisa quando sair uma versão nova.</p>
       </div>
+      <h2 style="margin-top: 10px;">No Windows (PC)</h2>
+      <div class="step">
+        <span class="step-num">1</span>
+        <p>Baixe o <strong>instalador do Windows</strong> acima e abra o arquivo. Ele instala só pro seu usuário, <strong>sem pedir administrador</strong>.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">2</span>
+        <p>Se o Windows mostrar <strong>&ldquo;O Windows protegeu o computador&rdquo;</strong>, clique em <strong>Mais informações</strong> e depois em <strong>Executar assim mesmo</strong>. O aviso aparece porque o instalador ainda não tem a assinatura paga da Microsoft.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">3</span>
+        <p>Pronto: o atalho fica na <strong>área de trabalho</strong> e no <strong>menu Iniciar</strong>. O app procura atualização sozinho; também dá pra buscar pelo botão <strong>Buscar atualizações</strong> no menu lateral.</p>
+      </div>
     </div>
   </div>
 
   <p class="footnote">Página de distribuição pessoal — não afiliada à Play Store nem a nenhuma loja de apps.</p>
 </div>
 <script>
-  // TV e Mobile publicam releases separadas neste mesmo repositório
-  // público (tags "v<N>" e "mobile-v<N>") — por isso o link não pode
-  // ser o fixo ".../releases/latest/download/<asset>" (ele resolve pra
-  // release mais recente do repositório INTEIRO, então se o outro app
-  // publicar depois, o link do primeiro passa a apontar pro asset
-  // errado e quebra). Busca direto na API pública (sem token, repo é
-  // público) e filtra pelo prefixo de tag de cada app, mesma lógica do
-  // AppUpdater.kt do app (ver docs/VERSIONAMENTO.md).
-  async function loadRelease(tagPrefix, linkId, metaId) {
+  // TV, Mobile e Desktop publicam releases separadas neste mesmo repositório
+  // público (tags "v<N>", "mobile-v<N>" e "desktop-v<N>") — por isso o link não
+  // pode ser o fixo ".../releases/latest/download/<asset>" (ele resolve pra
+  // release mais recente do repositório INTEIRO). Busca direto na API pública
+  // (sem token, repo é público) e filtra pelo prefixo de tag de cada app, mesma
+  // lógica do AppUpdater.kt dos apps (ver docs/VERSIONAMENTO.md).
+  //
+  // Correção de 25/10/2026: a API devolve 30 releases por página e NÃO na ordem
+  // de publicação (todas têm o mesmo "created_at"), então pegar "a primeira que
+  // combina" mostrava o Mobile v9 em vez do v20. Agora lê todas as páginas e
+  // escolhe sempre o MAIOR número de cada série.
+  async function fetchAllReleases() {
+    const all = [];
+    for (let page = 1; page <= 5; page++) {
+      const res = await fetch('https://api.github.com/repos/MARKM1000-DEV/maxcine-releases/releases?per_page=100&page=' + page);
+      const items = await res.json();
+      if (!Array.isArray(items)) throw new Error('resposta inesperada');
+      all.push(...items);
+      if (items.length < 100) break;
+    }
+    return all;
+  }
+  const releasesPromise = fetchAllReleases();
+
+  async function loadRelease(tagPrefix, linkId, metaId, ext = '.apk') {
     try {
-      const res = await fetch('https://api.github.com/repos/MARKM1000-DEV/maxcine-releases/releases');
-      const releases = await res.json();
-      const release = releases.find(r => r.tag_name.startsWith(tagPrefix) && /^\d+$/.test(r.tag_name.slice(tagPrefix.length)));
-      if (!release) return;
-      const asset = release.assets.find(a => a.name.endsWith('.apk'));
-      if (!asset) return;
+      const releases = await releasesPromise;
+      const number = r => Number(r.tag_name.slice(tagPrefix.length));
+      const release = releases
+        .filter(r => !r.draft && !r.prerelease && r.tag_name.startsWith(tagPrefix) && /^\d+$/.test(r.tag_name.slice(tagPrefix.length)))
+        .filter(r => r.assets.some(a => a.name.endsWith(ext)))
+        .sort((x, y) => number(y) - number(x))[0];
+      if (!release) {
+        document.getElementById(metaId).innerHTML = '<span>Ainda não publicado.</span>';
+        return;
+      }
+      const asset = release.assets.find(a => a.name.endsWith(ext));
       document.getElementById(linkId).href = asset.browser_download_url;
       const sizeMb = Math.round(asset.size / (1024 * 1024));
       document.getElementById(metaId).innerHTML =
@@ -301,6 +350,7 @@
   }
   loadRelease('v', 'tv-download', 'tv-meta');
   loadRelease('mobile-v', 'mobile-download', 'mobile-meta');
+  loadRelease('desktop-v', 'desktop-download', 'desktop-meta', '.msi');
 </script>
 </body>
 </html>
